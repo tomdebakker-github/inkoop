@@ -1,0 +1,955 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="BXB Inkoop">
+<meta name="theme-color" content="#071d2f">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<title>BXB Inkoop</title>
+<link href="https://fonts.googleapis.com/css2?family=Bai+Jamjuree:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #071d2f;
+  --bg-card: #0d2a42;
+  --bg-card-alt: #112f4a;
+  --text: #ffffff;
+  --text-dim: rgba(255,255,255,0.55);
+  --text-mid: rgba(255,255,255,0.75);
+  --accent: #d5001c;
+  --accent-dim: rgba(213,0,28,0.15);
+  --accent-light: #ff2d47;
+  --green: #34d399;
+  --green-dim: rgba(52,211,153,0.15);
+  --orange: #f59e0b;
+  --orange-dim: rgba(245,158,11,0.15);
+  --blue: #60a5fa;
+  --blue-dim: rgba(96,165,250,0.15);
+  --radius: 16px;
+  --radius-sm: 10px;
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+body {
+  font-family: 'Bai Jamjuree', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden;
+  padding-top: var(--safe-top);
+  padding-bottom: calc(70px + var(--safe-bottom));
+}
+
+/* Header */
+.header {
+  position: sticky; top: 0; z-index: 100;
+  background: var(--bg);
+  padding: 12px 20px 8px;
+  padding-top: calc(12px + var(--safe-top));
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  display: flex; align-items: center; justify-content: space-between;
+}
+.header-logo { height: 22px; }
+.header-date { font-size: 13px; color: var(--text-dim); font-weight: 500; }
+
+/* Tab bar */
+.tab-bar {
+  position: fixed; bottom: 0; left: 0; right: 0; z-index: 100;
+  background: rgba(7,29,47,0.95);
+  backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+  border-top: 1px solid rgba(255,255,255,0.08);
+  display: flex; justify-content: space-around; align-items: center;
+  padding: 8px 0 calc(8px + var(--safe-bottom));
+}
+.tab-item {
+  display: flex; flex-direction: column; align-items: center;
+  gap: 3px; padding: 6px 16px; border: none; background: none;
+  color: var(--text-dim); font-family: inherit; font-size: 11px;
+  font-weight: 500; cursor: pointer; transition: color 0.2s;
+}
+.tab-item.active { color: var(--accent); }
+.tab-item svg { width: 22px; height: 22px; }
+
+/* Pages */
+.page { display: none; padding: 16px 16px 24px; }
+.page.active { display: block; }
+
+/* Section header */
+.section-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin: 20px 0 12px; padding: 0 4px;
+}
+.section-header:first-child { margin-top: 8px; }
+.section-title { font-size: 18px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+.brand-icon { width: 20px; height: 20px; flex-shrink: 0; }
+.section-count {
+  font-size: 12px; color: var(--text-dim); background: var(--bg-card);
+  padding: 4px 10px; border-radius: 20px;
+}
+
+/* ── Hero card (#1 per model) ── */
+.auto-card {
+  background: var(--bg-card);
+  border-radius: var(--radius);
+  overflow: hidden;
+  margin-bottom: 14px;
+  transition: transform 0.2s;
+}
+.auto-card.expanded .card-details { display: block; }
+.card-image-wrap {
+  position: relative; width: 100%; height: 200px; overflow: hidden;
+}
+.card-image {
+  width: 100%; height: 100%; object-fit: cover;
+}
+.card-image-overlay {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  padding: 40px 14px 12px;
+  background: linear-gradient(0deg, rgba(7,29,47,0.92) 0%, rgba(7,29,47,0.6) 60%, transparent 100%);
+}
+.card-overlay-title {
+  font-size: 16px; font-weight: 700; line-height: 1.25;
+  margin-bottom: 4px; text-shadow: 0 1px 4px rgba(0,0,0,0.5);
+}
+.card-overlay-meta {
+  display: flex; gap: 8px; flex-wrap: wrap;
+  font-size: 12px; color: rgba(255,255,255,0.7);
+}
+.card-overlay-meta span { display: flex; align-items: center; gap: 3px; }
+.card-rank {
+  position: absolute; top: 10px; left: 10px;
+  background: var(--accent); color: #ffffff;
+  font-size: 13px; font-weight: 700;
+  width: 28px; height: 28px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+}
+.card-badges {
+  position: absolute; top: 10px; right: 10px;
+  display: flex; gap: 6px;
+}
+.badge {
+  font-size: 11px; font-weight: 600;
+  padding: 3px 8px; border-radius: 6px;
+  backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+}
+.badge-exact { background: rgba(52,211,153,0.25); color: var(--green); }
+.badge-geschat { background: rgba(245,158,11,0.25); color: var(--orange); }
+.badge-hybrid { background: rgba(96,165,250,0.25); color: var(--blue); }
+
+.card-body { padding: 12px 14px 6px; }
+.card-title { font-size: 15px; font-weight: 600; line-height: 1.3; margin-bottom: 8px; }
+.card-meta { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 10px; }
+.card-meta span {
+  font-size: 12px; color: var(--text-dim);
+  display: flex; align-items: center; gap: 4px;
+}
+
+/* Price strip under hero image */
+.price-strip {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 14px;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+.price-col { }
+.price-label { font-size: 11px; color: var(--text-dim); margin-bottom: 1px; }
+.price-value { font-size: 17px; font-weight: 700; }
+.price-value.gold { color: var(--accent); }
+.price-value.green { color: var(--green); }
+.price-small { font-size: 13px; font-weight: 600; }
+
+/* Marge highlight box */
+.marge-box {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  background: var(--accent-dim); border-radius: 8px;
+  padding: 6px 14px; min-width: 80px;
+}
+.marge-box .price-label { color: rgba(255,255,255,0.5); }
+.marge-box .marge-val { font-size: 16px; font-weight: 700; color: var(--accent-light); }
+
+/* Score bar */
+.score-row {
+  display: flex; align-items: center; gap: 10px;
+  margin: 6px 14px 4px;
+}
+.score-bar-wrap {
+  flex: 1; height: 6px; background: rgba(255,255,255,0.08);
+  border-radius: 3px; overflow: hidden;
+}
+.score-bar {
+  height: 100%; border-radius: 3px;
+  background: linear-gradient(90deg, #d5001c, #ff2d47);
+  transition: width 0.6s ease;
+}
+.score-label { font-size: 13px; font-weight: 600; color: var(--accent); min-width: 32px; text-align: right; }
+
+/* ── Compact card (#2, #3) ── */
+.compact-card {
+  background: var(--bg-card);
+  border-radius: var(--radius-sm);
+  margin-bottom: 8px;
+  overflow: hidden;
+  transition: transform 0.2s;
+}
+.compact-card.expanded .card-details { display: block; }
+.compact-top {
+  display: flex; align-items: center; gap: 10px;
+  padding: 12px 14px;
+}
+.compact-rank {
+  width: 26px; height: 26px; border-radius: 50%;
+  background: rgba(213,0,28,0.15); color: var(--accent-light);
+  font-size: 13px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.compact-info { flex: 1; min-width: 0; }
+.compact-title { font-size: 14px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.compact-meta { font-size: 12px; color: var(--text-dim); margin-top: 2px; }
+.compact-marge {
+  flex-shrink: 0; text-align: right;
+  background: var(--accent-dim); border-radius: 6px;
+  padding: 4px 10px;
+}
+.compact-marge-val { font-size: 14px; font-weight: 700; color: var(--accent-light); }
+.compact-marge-pct { font-size: 10px; color: var(--text-dim); }
+
+/* Expand button */
+.card-expand {
+  display: flex; align-items: center; justify-content: center;
+  gap: 6px; width: 100%; padding: 10px;
+  border: none; background: rgba(255,255,255,0.03);
+  color: var(--text-dim); font-family: inherit;
+  font-size: 12px; font-weight: 500; cursor: pointer;
+}
+.card-expand svg { width: 16px; height: 16px; transition: transform 0.3s; }
+.auto-card.expanded .card-expand svg, .compact-card.expanded .card-expand svg { transform: rotate(180deg); }
+
+/* Card details */
+.card-details { display: none; padding: 0 16px 14px; }
+.detail-section { margin-bottom: 14px; }
+.detail-title { font-size: 12px; color: var(--text-dim); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
+.detail-text { font-size: 14px; color: var(--text-mid); line-height: 1.5; }
+
+.feature-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+.feature-tag {
+  font-size: 11px; padding: 4px 10px;
+  background: var(--bg-card-alt); border-radius: 20px;
+  color: var(--text-mid); font-weight: 500;
+}
+
+.calc-grid {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 1px; background: rgba(255,255,255,0.04);
+  border-radius: var(--radius-sm); overflow: hidden;
+}
+.calc-item {
+  padding: 8px 12px; background: var(--bg-card);
+}
+.calc-item.full { grid-column: 1 / -1; }
+.calc-key { font-size: 11px; color: var(--text-dim); }
+.calc-val { font-size: 14px; font-weight: 600; margin-top: 1px; }
+.calc-val.gold { color: var(--accent); }
+
+/* Action buttons */
+.action-row {
+  display: flex; gap: 8px; padding: 12px 14px;
+  border-top: 1px solid rgba(255,255,255,0.04);
+}
+.action-btn {
+  flex: 1; padding: 11px 8px; border-radius: var(--radius-sm);
+  border: none; font-family: inherit; font-size: 13px;
+  font-weight: 600; cursor: pointer; transition: all 0.2s;
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+}
+.action-btn svg { width: 16px; height: 16px; }
+.btn-koop { background: var(--green); color: var(--bg); }
+.btn-koop:active { background: #2bb885; }
+.btn-niet { background: var(--orange-dim); color: var(--orange); }
+.btn-niet:active { background: var(--orange); color: var(--bg); }
+.btn-later { background: rgba(255,255,255,0.06); color: var(--text-dim); }
+.btn-later:active { background: rgba(255,255,255,0.12); }
+
+/* Mobile.de link button */
+.link-mobilede {
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+  width: 100%; padding: 10px 14px;
+  background: rgba(255,255,255,0.04);
+  border: none; border-top: 1px solid rgba(255,255,255,0.04);
+  color: var(--blue); font-family: inherit; font-size: 13px;
+  font-weight: 600; cursor: pointer; text-decoration: none;
+  transition: background 0.2s;
+}
+.link-mobilede:active { background: rgba(96,165,250,0.1); }
+.link-mobilede svg { width: 14px; height: 14px; }
+.compact-mobilede {
+  display: flex; align-items: center; justify-content: center; gap: 5px;
+  padding: 8px 12px;
+  border-top: 1px solid rgba(255,255,255,0.04);
+  color: var(--blue); font-size: 12px; font-weight: 500;
+  text-decoration: none;
+}
+.compact-mobilede:active { background: rgba(96,165,250,0.08); }
+.compact-mobilede svg { width: 12px; height: 12px; }
+
+/* Status overlay on card */
+.auto-card.status-gekocht { border: 1px solid rgba(52,211,153,0.3); }
+.auto-card.status-niet { opacity: 0.45; }
+.auto-card.status-later { border: 1px solid rgba(255,189,0,0.2); }
+.compact-card.status-gekocht { border: 1px solid rgba(52,211,153,0.3); }
+.compact-card.status-niet { opacity: 0.45; }
+.compact-card.status-later { border: 1px solid rgba(255,189,0,0.2); }
+.status-badge-card {
+  position: absolute; bottom: 10px; left: 10px;
+  font-size: 12px; font-weight: 700; padding: 4px 10px;
+  border-radius: 6px; text-transform: uppercase; letter-spacing: 0.5px;
+}
+.status-badge-card.gekocht { background: var(--green); color: var(--bg); }
+.status-badge-card.niet { background: var(--orange-dim); color: var(--orange); }
+.status-badge-card.later { background: var(--accent-dim); color: var(--accent); }
+
+/* Dashboard */
+.stats-grid {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 10px; margin-bottom: 20px;
+}
+.stat-card {
+  background: var(--bg-card); border-radius: var(--radius);
+  padding: 16px; text-align: center;
+}
+.stat-value { font-size: 28px; font-weight: 700; margin-bottom: 2px; }
+.stat-label { font-size: 12px; color: var(--text-dim); font-weight: 500; }
+.stat-card.wide { grid-column: 1 / -1; }
+
+/* Model breakdown cards */
+.model-break-card {
+  background: var(--bg-card); border-radius: var(--radius-sm);
+  padding: 14px; margin-bottom: 8px;
+}
+.model-break-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+.model-break-name { font-size: 14px; font-weight: 600; }
+.model-break-stat { font-size: 13px; color: var(--text-dim); }
+.model-break-stat strong { color: var(--accent-light); font-weight: 600; }
+.model-bar-wrap { height: 5px; background: rgba(255,255,255,0.06); border-radius: 3px; overflow: hidden; }
+.model-bar { height: 100%; border-radius: 3px; background: linear-gradient(90deg, #d5001c, #ff2d47); transition: width 0.6s; }
+
+/* Watchlist item */
+.watch-item {
+  background: var(--bg-card); border-radius: var(--radius);
+  margin-bottom: 10px; overflow: hidden;
+}
+.watch-item.expanded .card-details { display: block; }
+.watch-top {
+  display: flex; align-items: center; gap: 12px;
+  padding: 14px;
+}
+.watch-thumb {
+  width: 56px; height: 56px; border-radius: 8px;
+  object-fit: cover; flex-shrink: 0;
+}
+.watch-info { flex: 1; min-width: 0; }
+.watch-title { font-size: 14px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.watch-meta { font-size: 12px; color: var(--text-dim); margin-top: 2px; }
+.watch-marge {
+  flex-shrink: 0; text-align: right;
+  background: var(--accent-dim); border-radius: 6px;
+  padding: 4px 10px;
+}
+.watch-marge-val { font-size: 14px; font-weight: 700; color: var(--accent-light); }
+.watch-marge-pct { font-size: 10px; color: var(--text-dim); }
+.watch-actions {
+  display: flex; gap: 8px; padding: 0 14px 12px;
+}
+.watch-btn {
+  flex: 1; padding: 9px; border-radius: var(--radius-sm);
+  border: none; font-family: inherit; font-size: 12px;
+  font-weight: 600; cursor: pointer; transition: all 0.2s;
+  display: flex; align-items: center; justify-content: center; gap: 5px;
+}
+.watch-btn svg { width: 14px; height: 14px; }
+.watch-btn.btn-ingekocht { background: var(--green); color: var(--bg); }
+.watch-btn.btn-ingekocht:active { background: #2bb885; }
+.watch-btn.btn-verwijder { background: rgba(255,255,255,0.06); color: var(--text-dim); }
+.watch-btn.btn-verwijder:active { background: rgba(255,255,255,0.12); }
+.watch-badge {
+  display: inline-block; font-size: 11px; font-weight: 700;
+  padding: 2px 8px; border-radius: 4px; margin-left: 8px;
+  background: var(--green); color: var(--bg); vertical-align: middle;
+}
+.watch-days {
+  font-size: 11px; color: var(--text-dim); margin-top: 1px;
+}
+
+/* Empty state */
+.empty-state {
+  text-align: center; padding: 60px 20px;
+  color: var(--text-dim);
+}
+.empty-state svg { width: 48px; height: 48px; margin-bottom: 12px; opacity: 0.3; }
+.empty-state p { font-size: 14px; }
+
+/* Pull indicator */
+.date-badge {
+  text-align: center; padding: 6px;
+  font-size: 12px; color: var(--text-dim);
+}
+
+/* Model filter pills */
+.filter-row {
+  display: flex; gap: 6px; overflow-x: auto; padding: 8px 0 4px;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.filter-row::-webkit-scrollbar { display: none; }
+.filter-pill {
+  flex-shrink: 0; padding: 6px 14px; border-radius: 20px;
+  border: 1px solid rgba(255,255,255,0.1); background: none;
+  color: var(--text-dim); font-family: inherit; font-size: 13px;
+  font-weight: 500; cursor: pointer; transition: all 0.2s;
+}
+.filter-pill.active {
+  background: var(--accent); color: #ffffff;
+  border-color: var(--accent);
+}
+
+/* Autotelex placeholder */
+.atx-placeholder {
+  margin-top: 8px; padding: 8px 12px;
+  background: var(--blue-dim); border-radius: var(--radius-sm);
+  font-size: 12px; color: var(--blue); text-align: center;
+}
+
+/* Animations */
+@keyframes slideUp { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
+.auto-card, .compact-card, .watch-item { animation: slideUp 0.4s ease both; }
+.auto-card:nth-child(2), .compact-card:nth-child(2) { animation-delay: 0.05s; }
+.auto-card:nth-child(3), .compact-card:nth-child(3) { animation-delay: 0.1s; }
+
+/* Watchlist counter badge on tab */
+.tab-badge {
+  position: absolute; top: 2px; right: 2px;
+  background: var(--accent); color: #fff;
+  font-size: 10px; font-weight: 700;
+  min-width: 16px; height: 16px; line-height: 16px;
+  border-radius: 8px; text-align: center; padding: 0 4px;
+}
+.tab-item { position: relative; }
+</style>
+</head>
+<body>
+
+<header class="header">
+  <img src="./logo.svg" alt="Bossen & de Bakker" class="header-logo" onerror="this.outerHTML='<span style=\'font-size:18px;font-weight:700\'>BXB</span>'">
+  <span class="header-date" id="headerDate"></span>
+</header>
+
+<!-- VANDAAG -->
+<div class="page active" id="pageDag">
+  <div class="date-badge" id="dateBadge"></div>
+  <div class="filter-row" id="filterRow"></div>
+  <div id="cardsContainer"></div>
+</div>
+
+<!-- WATCHLIST -->
+<div class="page" id="pageWatch">
+  <div class="section-header"><span class="section-title">Watchlist</span><span class="section-count" id="watchCount"></span></div>
+  <div class="filter-row" id="watchFilter"></div>
+  <div id="watchList"></div>
+</div>
+
+<!-- DASHBOARD -->
+<div class="page" id="pageDash">
+  <div class="section-header"><span class="section-title">Overzicht</span></div>
+  <div class="stats-grid" id="statsGrid"></div>
+  <div class="section-header"><span class="section-title">Per model</span></div>
+  <div id="modelStats"></div>
+</div>
+
+<!-- TAB BAR -->
+<nav class="tab-bar">
+  <button class="tab-item active" data-page="pageDag">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+    Vandaag
+  </button>
+  <button class="tab-item" data-page="pageWatch" id="tabWatch">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+    Watchlist
+  </button>
+  <button class="tab-item" data-page="pageDash">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>
+    Dashboard
+  </button>
+</nav>
+
+<script>
+// ═══════════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════════
+let appData = null;
+let decisions = {};    // { vehicleId: { status, model, title, image, price, margin, margin_pct, nlPrice, date, savedAt, boughtAt } }
+let activeFilter = 'alle';
+let watchFilter = 'alle';
+
+// Statuses: 'bewaard' (on watchlist), 'niet' (dismissed), 'ingekocht' (bought)
+try { decisions = JSON.parse(localStorage.getItem('bxb_decisions') || '{}'); } catch(e) {}
+function saveDecisions() { localStorage.setItem('bxb_decisions', JSON.stringify(decisions)); }
+
+// ═══════════════════════════════════════════
+//  HELPERS
+// ═══════════════════════════════════════════
+function eur(n) {
+  if (n == null) return '-';
+  return new Intl.NumberFormat('nl-NL', { style:'currency', currency:'EUR', maximumFractionDigits:0 }).format(n);
+}
+function pct(n) { return n + '%'; }
+function dot(n) { return new Intl.NumberFormat('nl-NL').format(n); }
+
+function formatDate(d) {
+  const months = ['jan','feb','mrt','apr','mei','jun','jul','aug','sep','okt','nov','dec'];
+  const days = ['zo','ma','di','wo','do','vr','za'];
+  const dt = new Date(d + 'T00:00:00');
+  return days[dt.getDay()] + ' ' + dt.getDate() + ' ' + months[dt.getMonth()];
+}
+function shortDate(d) {
+  const dt = new Date(d + 'T00:00:00');
+  return dt.getDate() + '-' + (dt.getMonth()+1) + '-' + dt.getFullYear();
+}
+function daysAgo(isoStr) {
+  if (!isoStr) return 0;
+  return Math.floor((Date.now() - new Date(isoStr).getTime()) / 86400000);
+}
+function mobileDeUrl(auto) {
+  if (auto.url) return auto.url;
+  return 'https://suchen.mobile.de/fahrzeug-details.html?id=' + auto.vehicleId;
+}
+function mobileDeLink(auto) {
+  return `<a class="link-mobilede" href="${mobileDeUrl(auto)}" target="_blank" rel="noopener">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+    Bekijk op mobile.de
+  </a>`;
+}
+function compactMobileDeLink(auto) {
+  return `<a class="compact-mobilede" href="${mobileDeUrl(auto)}" target="_blank" rel="noopener">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+    mobile.de
+  </a>`;
+}
+
+// ═══════════════════════════════════════════
+//  TAB NAVIGATION
+// ═══════════════════════════════════════════
+document.querySelectorAll('.tab-item').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab-item').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById(btn.dataset.page).classList.add('active');
+  });
+});
+
+function updateWatchBadge() {
+  const count = Object.values(decisions).filter(d => d.status === 'bewaard').length;
+  const tab = document.getElementById('tabWatch');
+  const existing = tab.querySelector('.tab-badge');
+  if (existing) existing.remove();
+  if (count > 0) {
+    tab.insertAdjacentHTML('beforeend', `<span class="tab-badge">${count}</span>`);
+  }
+}
+
+// ═══════════════════════════════════════════
+//  SHARED COMPONENTS
+// ═══════════════════════════════════════════
+function detailsHTML(auto) {
+  return `<div class="card-details">
+    <div class="detail-section">
+      <div class="detail-title">Waarom deze auto?</div>
+      <div class="detail-text">${auto.reasoning}</div>
+    </div>
+    <div class="detail-section">
+      <div class="detail-title">Uitrusting</div>
+      <div class="feature-tags">${(auto.features||[]).map(f => `<span class="feature-tag">${f}</span>`).join('')}</div>
+    </div>
+    <div class="detail-section">
+      <div class="detail-title">Berekening</div>
+      <div class="calc-grid">
+        <div class="calc-item"><div class="calc-key">DE bruto (incl. 19% MwSt)</div><div class="calc-val">${eur(auto.price_de_bruto)}</div></div>
+        <div class="calc-item"><div class="calc-key">DE netto</div><div class="calc-val">${eur(auto.price_de_netto)}</div></div>
+        <div class="calc-item"><div class="calc-key">BPM (${auto.bpm_co2} g/km CO2)</div><div class="calc-val">${eur(auto.bpm)} <span style="font-size:11px;color:var(--text-dim)">${auto.bpm_source}</span></div></div>
+        <div class="calc-item"><div class="calc-key">Transport</div><div class="calc-val">${eur(auto.transport)}</div></div>
+        <div class="calc-item"><div class="calc-key">Marge ${pct(auto.margin_pct)}</div><div class="calc-val gold">${eur(auto.margin_eur)}</div></div>
+        <div class="calc-item"><div class="calc-key">NL verkoop (incl. 21% BTW)</div><div class="calc-val gold">${eur(auto.nl_sale_price)}</div></div>
+      </div>
+    </div>
+  </div>`;
+}
+
+// ═══════════════════════════════════════════
+//  VANDAAG: Actions = Bewaren / Niet
+// ═══════════════════════════════════════════
+function dagActionsHTML(id, model, auto) {
+  const safeTitle = auto.title.replace(/'/g,"\\'");
+  const safeUrl = mobileDeUrl(auto).replace(/'/g,"\\'");
+  const safeImg = (auto.image||'').replace(/'/g,"\\'");
+  const args = `'${id}','${model}','${safeTitle}','${safeImg}','${safeUrl}',${auto.price_de_bruto},${auto.margin_eur},${auto.margin_pct},${auto.nl_sale_price}`;
+  return `<div class="action-row">
+    <button class="action-btn btn-koop" onclick="bewaar(${args})">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+      Bewaren
+    </button>
+    <button class="action-btn btn-niet" onclick="dismiss(${args})">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      Niet
+    </button>
+  </div>`;
+}
+
+function bewaar(id, model, title, image, url, price, margin, marginPct, nlPrice) {
+  decisions[id] = { status:'bewaard', model, title, image, url, price, margin, margin_pct: marginPct, nlPrice, date: appData.date, savedAt: new Date().toISOString() };
+  saveDecisions(); renderAll();
+}
+function dismiss(id, model, title, image, url, price, margin, marginPct, nlPrice) {
+  decisions[id] = { status:'niet', model, title, image, url, price, margin, margin_pct: marginPct, nlPrice, date: appData.date, decidedAt: new Date().toISOString() };
+  saveDecisions(); renderAll();
+}
+
+// ═══════════════════════════════════════════
+//  HERO CARD (rank #1)
+// ═══════════════════════════════════════════
+function renderHeroCard(auto, model) {
+  const id = auto.vehicleId;
+  const status = decisions[id]?.status || null;
+  const statusClass = status ? 'status-' + status : '';
+  const isSaved = status === 'bewaard';
+  const isDismissed = status === 'niet';
+
+  const bpmBadge = auto.bpm_source === 'geschat'
+    ? '<span class="badge badge-geschat">BPM geschat</span>'
+    : '<span class="badge badge-exact">BPM exact</span>';
+  const fuelBadge = auto.fuel === 'Hybride' ? '<span class="badge badge-hybrid">Hybride</span>' : '';
+
+  const statusBadgeHTML = isSaved
+    ? '<div class="status-badge-card gekocht">Op watchlist</div>'
+    : isDismissed ? '<div class="status-badge-card niet">Afgewezen</div>'
+    : status === 'ingekocht' ? '<div class="status-badge-card gekocht">Ingekocht</div>' : '';
+
+  const atxHTML = (auto.autotelex_internet == null)
+    ? '<div class="atx-placeholder">Autotelex waarde beschikbaar zodra VehicleData API actief is</div>'
+    : `<div style="margin-top:8px;padding:0 14px"><span class="price-label">Autotelex internetwaarde</span><br><span class="price-value green">${eur(auto.autotelex_internet)}</span></div>`;
+
+  return `
+    <div class="auto-card ${statusClass}" data-id="${id}">
+      <div class="card-image-wrap">
+        <img class="card-image" src="${auto.image}" alt="${auto.title}" loading="lazy">
+        <div class="card-rank">1</div>
+        <div class="card-badges">${fuelBadge}${bpmBadge}</div>
+        ${statusBadgeHTML}
+        <div class="card-image-overlay">
+          <div class="card-overlay-title">${auto.title}</div>
+          <div class="card-overlay-meta">
+            <span>${auto.year}</span>
+            <span>${dot(auto.km)} km</span>
+            <span>${auto.color_nl}</span>
+            <span>${auto.fuel}</span>
+          </div>
+        </div>
+      </div>
+      <div class="price-strip">
+        <div class="price-col">
+          <div class="price-label">Inkoop DE</div>
+          <div class="price-value">${eur(auto.price_de_bruto)}</div>
+        </div>
+        <div class="marge-box">
+          <div class="price-label">Marge ${pct(auto.margin_pct)}</div>
+          <div class="marge-val">${eur(auto.margin_eur)}</div>
+        </div>
+        <div class="price-col" style="text-align:right">
+          <div class="price-label">NL verkoop</div>
+          <div class="price-value gold">${eur(auto.nl_sale_price)}</div>
+        </div>
+      </div>
+      <div class="score-row">
+        <span style="font-size:12px;color:var(--text-dim)">Score</span>
+        <div class="score-bar-wrap"><div class="score-bar" style="width:${auto.quality_score}%"></div></div>
+        <span class="score-label">${auto.quality_score}</span>
+      </div>
+      ${atxHTML}
+      ${mobileDeLink(auto)}
+      <button class="card-expand" onclick="toggleCard('${id}')">
+        <span>Details & berekening</span>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+      </button>
+      ${detailsHTML(auto)}
+      ${!status ? dagActionsHTML(id, model, auto) : ''}
+    </div>`;
+}
+
+// ═══════════════════════════════════════════
+//  COMPACT CARD (rank #2, #3)
+// ═══════════════════════════════════════════
+function renderCompactCard(auto, rank, model) {
+  const id = auto.vehicleId;
+  const status = decisions[id]?.status || null;
+  const statusClass = status ? 'status-' + (status === 'bewaard' ? 'gekocht' : status) : '';
+  const label = status === 'bewaard' ? ' &middot; Watchlist' : status === 'niet' ? ' &middot; Afgewezen' : status === 'ingekocht' ? ' &middot; Ingekocht' : '';
+
+  return `
+    <div class="compact-card ${statusClass}" data-id="${id}">
+      <div class="compact-top">
+        <div class="compact-rank">${rank}</div>
+        <div class="compact-info">
+          <div class="compact-title">${auto.title}</div>
+          <div class="compact-meta">${auto.year} &middot; ${dot(auto.km)} km &middot; ${auto.color_nl}${label}</div>
+        </div>
+        <div class="compact-marge">
+          <div class="compact-marge-val">${eur(auto.margin_eur)}</div>
+          <div class="compact-marge-pct">${pct(auto.margin_pct)}</div>
+        </div>
+      </div>
+      ${compactMobileDeLink(auto)}
+      <button class="card-expand" onclick="toggleCompact('${id}')">
+        <span>Details</span>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+      </button>
+      ${detailsHTML(auto)}
+      ${!status ? dagActionsHTML(id, model, auto) : ''}
+    </div>`;
+}
+
+function toggleCard(id) {
+  const el = document.querySelector(`.auto-card[data-id="${id}"]`);
+  if (el) el.classList.toggle('expanded');
+}
+function toggleCompact(id) {
+  const el = document.querySelector(`.compact-card[data-id="${id}"]`);
+  if (el) el.classList.toggle('expanded');
+}
+function toggleWatch(id) {
+  const el = document.querySelector(`.watch-item[data-id="${id}"]`);
+  if (el) el.classList.toggle('expanded');
+}
+
+// ═══════════════════════════════════════════
+//  RENDER: VANDAAG
+// ═══════════════════════════════════════════
+function renderToday() {
+  if (!appData) return;
+  document.getElementById('headerDate').textContent = formatDate(appData.date);
+  document.getElementById('dateBadge').textContent = 'Monitor van ' + formatDate(appData.date);
+
+  const models = ['alle', ...appData.models.map(m => m.model)];
+  document.getElementById('filterRow').innerHTML = models.map(m =>
+    `<button class="filter-pill ${m === activeFilter ? 'active' : ''}" onclick="setFilter('${m}')">${m === 'alle' ? 'Alle modellen' : m.replace('-Klasse','')}</button>`
+  ).join('');
+
+  let html = '';
+  const filtered = activeFilter === 'alle' ? appData.models : appData.models.filter(m => m.model === activeFilter);
+
+  filtered.forEach(group => {
+    if (group.top.length === 0) return;
+    html += `<div class="section-header">
+      <span class="section-title"><svg class="brand-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="11" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="1.5"/><line x1="12" y1="12" x2="12" y2="2" stroke="rgba(255,255,255,0.35)" stroke-width="1.2"/><line x1="12" y1="12" x2="20.66" y2="17" stroke="rgba(255,255,255,0.35)" stroke-width="1.2"/><line x1="12" y1="12" x2="3.34" y2="17" stroke="rgba(255,255,255,0.35)" stroke-width="1.2"/></svg>${group.model}</span>
+      <span class="section-count">${group.top.length} auto's</span>
+    </div>`;
+    group.top.forEach((auto, i) => {
+      if (i === 0) {
+        html += renderHeroCard(auto, group.model);
+      } else {
+        html += renderCompactCard(auto, i + 1, group.model);
+      }
+    });
+  });
+  document.getElementById('cardsContainer').innerHTML = html;
+}
+
+function setFilter(f) { activeFilter = f; renderToday(); }
+
+// ═══════════════════════════════════════════
+//  RENDER: WATCHLIST
+// ═══════════════════════════════════════════
+function markIngekocht(id) {
+  if (decisions[id]) {
+    decisions[id].status = 'ingekocht';
+    decisions[id].boughtAt = new Date().toISOString();
+    saveDecisions(); renderAll();
+  }
+}
+function removeFromWatch(id) {
+  if (decisions[id]) {
+    decisions[id].status = 'niet';
+    decisions[id].decidedAt = new Date().toISOString();
+    saveDecisions(); renderAll();
+  }
+}
+
+function renderWatchlist() {
+  const all = Object.entries(decisions)
+    .filter(([_, d]) => d.status === 'bewaard' || d.status === 'ingekocht')
+    .map(([id, d]) => ({ id, ...d }))
+    .sort((a, b) => new Date(b.savedAt || b.boughtAt) - new Date(a.savedAt || a.boughtAt));
+
+  const bewaard = all.filter(d => d.status === 'bewaard');
+  const ingekocht = all.filter(d => d.status === 'ingekocht');
+
+  document.getElementById('watchCount').textContent = bewaard.length + ' bewaard, ' + ingekocht.length + ' ingekocht';
+
+  // Filter pills
+  const filters = ['alle', 'bewaard', 'ingekocht'];
+  document.getElementById('watchFilter').innerHTML = filters.map(f =>
+    `<button class="filter-pill ${f === watchFilter ? 'active' : ''}" onclick="setWatchFilter('${f}')">${
+      f === 'alle' ? 'Alles' : f === 'bewaard' ? 'Watchlist' : 'Ingekocht'
+    }</button>`
+  ).join('');
+
+  const filtered = watchFilter === 'alle' ? all : all.filter(d => d.status === watchFilter);
+
+  if (filtered.length === 0) {
+    document.getElementById('watchList').innerHTML = `
+      <div class="empty-state">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+        <p>Nog geen auto's bewaard.<br>Bewaar auto's vanuit het Vandaag-overzicht.</p>
+      </div>`;
+    return;
+  }
+
+  document.getElementById('watchList').innerHTML = filtered.map(d => {
+    const days = daysAgo(d.savedAt);
+    const daysLabel = days === 0 ? 'vandaag' : days === 1 ? 'gisteren' : days + ' dagen geleden';
+    const isBought = d.status === 'ingekocht';
+
+    // Try to find full auto data in appData for details expansion
+    let autoData = null;
+    if (appData?.models) {
+      for (const m of appData.models) {
+        const found = m.top.find(a => a.vehicleId === d.id);
+        if (found) { autoData = found; break; }
+      }
+    }
+
+    return `
+      <div class="watch-item" data-id="${d.id}">
+        <div class="watch-top">
+          ${d.image ? `<img class="watch-thumb" src="${d.image}" alt="" loading="lazy">` : ''}
+          <div class="watch-info">
+            <div class="watch-title">${d.title}${isBought ? '<span class="watch-badge">Ingekocht</span>' : ''}</div>
+            <div class="watch-meta">${d.model} &middot; ${shortDate(d.date)}</div>
+            <div class="watch-days">Bewaard ${daysLabel}</div>
+          </div>
+          <div class="watch-marge">
+            <div class="watch-marge-val">${eur(d.margin)}</div>
+            <div class="watch-marge-pct">${d.margin_pct ? pct(d.margin_pct) : ''}</div>
+          </div>
+        </div>
+        <a class="link-mobilede" href="${d.url || ('https://suchen.mobile.de/fahrzeug-details.html?id=' + d.id)}" target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+          Bekijk op mobile.de
+        </a>
+        ${autoData ? `<button class="card-expand" onclick="toggleWatch('${d.id}')">
+          <span>Details</span>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>${detailsHTML(autoData)}` : ''}
+        ${!isBought ? `<div class="watch-actions">
+          <button class="watch-btn btn-ingekocht" onclick="markIngekocht('${d.id}')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+            Ingekocht
+          </button>
+          <button class="watch-btn btn-verwijder" onclick="removeFromWatch('${d.id}')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            Verwijderen
+          </button>
+        </div>` : ''}
+      </div>`;
+  }).join('');
+}
+
+function setWatchFilter(f) { watchFilter = f; renderWatchlist(); }
+
+// ═══════════════════════════════════════════
+//  RENDER: DASHBOARD
+// ═══════════════════════════════════════════
+function renderDashboard() {
+  const all = Object.values(decisions);
+  const bewaard = all.filter(d => d.status === 'bewaard');
+  const ingekocht = all.filter(d => d.status === 'ingekocht');
+  const niet = all.filter(d => d.status === 'niet');
+  const totalSeen = all.length;
+  const totalMargin = ingekocht.reduce((s, d) => s + (d.margin || 0), 0);
+  const avgMargin = ingekocht.length ? Math.round(totalMargin / ingekocht.length) : 0;
+
+  const stats = appData?.stats || {};
+
+  document.getElementById('statsGrid').innerHTML = `
+    <div class="stat-card">
+      <div class="stat-value" style="color:var(--text-mid)">${stats.total_seen || totalSeen}</div>
+      <div class="stat-label">Beoordeeld</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value" style="color:var(--accent)">${bewaard.length}</div>
+      <div class="stat-label">Op watchlist</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value" style="color:var(--green)">${ingekocht.length}</div>
+      <div class="stat-label">Ingekocht</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">${avgMargin ? eur(avgMargin) : '-'}</div>
+      <div class="stat-label">Gem. marge ingekocht</div>
+    </div>
+  `;
+
+  // Model breakdown with progress bars
+  if (appData?.models) {
+    const maxScore = 100;
+    const modelHTML = appData.models.map(m => {
+      const modelBought = ingekocht.filter(d => d.model === m.model).length;
+      const modelSaved = bewaard.filter(d => d.model === m.model).length;
+      const avgScore = m.top.length ? Math.round(m.top.reduce((s,a) => s + a.quality_score, 0) / m.top.length) : 0;
+      return `
+        <div class="model-break-card">
+          <div class="model-break-row">
+            <span class="model-break-name">${m.model}</span>
+            <span class="model-break-stat">${modelSaved} bewaard &middot; <strong>${modelBought} ingekocht</strong></span>
+          </div>
+          <div class="model-bar-wrap"><div class="model-bar" style="width:${avgScore}%"></div></div>
+          <div style="font-size:11px;color:var(--text-dim);margin-top:4px">Gem. score ${avgScore} &middot; ${m.top.length} in top vandaag</div>
+        </div>`;
+    }).join('');
+    document.getElementById('modelStats').innerHTML = modelHTML;
+  }
+}
+
+// ═══════════════════════════════════════════
+//  RENDER ALL
+// ═══════════════════════════════════════════
+function renderAll() {
+  renderToday();
+  renderWatchlist();
+  renderDashboard();
+  updateWatchBadge();
+}
+
+// ═══════════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════════
+async function loadData() {
+  try {
+    const resp = await fetch('./data.json?t=' + Date.now());
+    appData = await resp.json();
+  } catch(e) {
+    console.warn('Could not load data.json');
+    return;
+  }
+  renderAll();
+}
+
+loadData();
+
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('./sw.js').catch(() => {});
+}
+</script>
+</body>
+</html>

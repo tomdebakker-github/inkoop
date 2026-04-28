@@ -1,0 +1,22 @@
+{
+  "name": "BXB Inkoop",
+  "short_name": "BXB Inkoop",
+  "description": "Dagelijkse inkoop-intelligence voor Bossen & de Bakker",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#071d2f",
+  "theme_color": "#071d2f",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
