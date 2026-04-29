@@ -4,8 +4,8 @@
   "description": "Dagelijkse inkoop-intelligence voor Bossen & de Bakker",
   "start_url": "./index.html",
   "display": "standalone",
-  "background_color": "#071d2f",
-  "theme_color": "#071d2f",
+  "background_color": "#f5f4f1",
+  "theme_color": "#f5f4f1",
   "orientation": "portrait",
   "icons": [
     {
